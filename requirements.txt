@@ -1,3 +1,2 @@
-PyPDF2==3.0.1
-scipdf==0.1.dev0
-spacy==3.5.2
+Requests==2.30.0
+setuptools==58.1.0

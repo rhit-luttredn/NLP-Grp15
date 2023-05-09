@@ -1,6 +1,7 @@
 @ECHO off
 ECHO =============== INSTALLING PIP REQS ===============
-pip install -r requirements.txt || ^
+pip install -r requirements.txt && ^
+pip install grobid_client || ^
 ECHO "Error installing pip requirements" && ^
 goto:exit
 
