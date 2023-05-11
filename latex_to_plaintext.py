@@ -1,11 +1,11 @@
 import pydetex.pipelines as pi
 
-file_path = "test.tex"
-
-def latex_to_text(path):
-  with open(path, 'r') as file:
-    content = file.read()
-  text = pi.strict_eqn(content)
+def latex_to_text(text):
+  text = pi.strict_eqn(text)
   return text
 
-print(latex_to_text(file_path))
+if __name__ == '__main__':
+  path = "test.tex"
+  with open(path, 'r') as file:
+    text = file.read()
+  print(latex_to_text(text))
