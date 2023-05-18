@@ -3,6 +3,20 @@ import tkinter as tk
 from tkinter import filedialog
 from grobid_client.grobid_client import GrobidClient
 import grobid_tei_xml
+from transformers import BertConfig, BertModel
+
+###########
+# GLOBALS #
+###########
+BERT_PATH = "./models/bert-finetuned/"
+BERT_MODEL = None
+CURR_DOCUMENT_TEXT = None
+CURR_EXTRACTED_TEXT = None
+CURR_ABSTRACT_TEXT = None
+
+#############
+# FUNCTIONS #
+#############
 
 def get_document_data(path):
     with open(path, 'r') as xml_file:
@@ -60,23 +74,40 @@ def parse_file(file_path):
     # v.config(command=output_text.yview)
     # output_text.pack()
 
+def load_models():
+    bert_model = BertModel.from_pretrained(BERT_PATH)
 
+    return bert_model
 
 
 root = tk.Tk()
 root.geometry("400x400") 
-root.title("Article Summarizer")  
+root.title("Article Summarizer")
 
-frame = tk.Frame(root)
-frame.pack(expand=True)
+main_frame = tk.Frame(root)
+main_frame.pack()
 
-button = tk.Button(frame, text="Upload File", command=upload_file)
-button.pack() 
+#################
+# BUTTONS FRAME #
+#################
 
-# v=tk.Scrollbar(frame, orient='vertical')
-# v.pack(side=tk.RIGHT, fill='y')
+buttons_frame = tk.Frame(main_frame)
+buttons_frame.grid(row=0)
 
-output_text = tk.Text(root, height=10, wrap=tk.WORD)
+button = tk.Button(buttons_frame, text="Upload File", command=upload_file)
+button.grid(column=0)
+
+################
+# OUTPUT FRAME #
+################
+
+output_frame = tk.Frame(main_frame)
+output_frame.grid(row=1)
+
+# Stages button
+# stages
+
+output_text = tk.Text(root, wrap=tk.WORD)
 output_text.pack(padx=10, pady=10)
 
 # Write the output to the text box
@@ -85,5 +116,7 @@ output_text.insert(tk.END, "Upload a file to summarize.")
 # Attach the scrollbar with the text widget
 # v.config(command=output_text.yview)
 # output_text.pack()
+
+# BERT_MODEL = load_models()
 
 root.mainloop()
