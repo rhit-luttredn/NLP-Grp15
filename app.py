@@ -3,13 +3,17 @@ import tkinter as tk
 from tkinter import filedialog
 from grobid_client.grobid_client import GrobidClient
 import grobid_tei_xml
-from transformers import BertConfig, BertModel
+from transformers import BertConfig, BertForSequenceClassification, BertTokenizerFast
+import nltk 
+import torch
+import tensorflow as tf
 
 ###########
 # GLOBALS #
 ###########
 BERT_PATH = "./models/bert-finetuned/"
 BERT_MODEL = None
+BERT_TOKENIZER = None
 CURR_DOCUMENT_TEXT = None
 CURR_EXTRACTED_TEXT = None
 CURR_ABSTRACT_TEXT = None
@@ -70,15 +74,29 @@ def parse_file(file_path):
     # Write the output to the text box
     output_text.insert(tk.END, document)
 
-    # # Attach the scrollbar with the text widget
+    # # TODO - Attach the scrollbar with the text widget
     # v.config(command=output_text.yview)
     # output_text.pack()
 
+    # Tokenize the document body text
+    doc_sents = nltk.sent_tokenize(document)
+    tokenized_doc = [BERT_TOKENIZER(sent, return_tensors='pt').input_ids for sent in doc_sents]
+
+    # Get extracted summary
+    with torch.no_grad():
+        labels = torch.tensor([1]).unsqueeze(0)
+        berted_doc = [tf.nn.softmax(BERT_MODEL(sent, labels=labels).logits, axis=0).numpy()[0] for sent in tokenized_doc]
+        print(berted_doc)
+        berted_doc = [tf.nn.softmax(BERT_MODEL.predict(sent, labels=labels)) for sent in tokenized_doc]
+        print(berted_doc)
+
+
 def load_models():
-    bert_model = BertModel.from_pretrained(BERT_PATH)
+    global BERT_MODEL, BERT_TOKENIZER
+    BERT_MODEL = BertForSequenceClassification.from_pretrained(BERT_PATH)
+    BERT_TOKENIZER = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
-    return bert_model
-
+nltk.download('punkt')
 
 root = tk.Tk()
 root.geometry("400x400") 
@@ -113,10 +131,6 @@ output_text.pack(padx=10, pady=10)
 # Write the output to the text box
 output_text.insert(tk.END, "Upload a file to summarize.")
 
-# Attach the scrollbar with the text widget
-# v.config(command=output_text.yview)
-# output_text.pack()
-
-# BERT_MODEL = load_models()
+load_models()
 
 root.mainloop()
