@@ -170,7 +170,7 @@ class MainFrame(tk.Frame):
         separator.grid(row=1, sticky="ew", padx=10, pady=10)
 
         output_frame = tk.Frame(self)
-        output_frame.grid(row=2)
+        output_frame.grid(row=2, sticky=(tk.N, tk.S, tk.E, tk.W), padx=10, pady=10)
 
         self.columnconfigure(0, weight=1)
 
@@ -197,9 +197,8 @@ class MainFrame(tk.Frame):
         # dropdown menu
         self.output_display = tk.StringVar()
         self.output_combo = ttk.Combobox(buttons_frame, state="readonly")
-        self.output_combo.bind("<<ComboboxSelected>>", self.update_output_text)
         self.output_combo['values'] = ('Document', 'Extracted', 'Abstract')
-        print(self.output_combo.current())
+        self.output_combo.bind("<<ComboboxSelected>>", lambda x: self.update_output_text())
         self.output_combo.current(0)
         self.output_combo.grid(row=4)
 
@@ -261,9 +260,12 @@ class MainFrame(tk.Frame):
         self.update_idletasks()
 
     def update_output_text(self):
-        texts = [self.curr_doc_text, self.curr_extracted_text, self.curr_abstract_text]
+        text = [self.curr_doc_text, self.curr_extracted_text, self.curr_abstract_text][self.output_combo.current()]
+        print(self.output_combo.current())
+        if text is None:
+            return
         self.output_text.delete("1.0", tk.END)
-        self.output_text.insert("1.0", texts[self.output_combo.current()])
+        self.output_text.insert("1.0", text)
 
 
 if __name__ == "__main__":
