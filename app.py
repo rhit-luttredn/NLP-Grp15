@@ -1,26 +1,19 @@
 import os
-import queue
 import shutil
 import tempfile
-import time
 import tkinter as tk
 from multiprocessing import Pipe, Process, Queue
 from threading import Thread
 from tkinter import filedialog, scrolledtext, ttk
 
-import dill
-dill.settings['recurse'] = True
-
 import docker
 import grobid_tei_xml
-from transformers import BertConfig, BertForSequenceClassification, BertTokenizerFast
-import nltk 
-import torch
-import tensorflow as tf
+import nltk
 import requests
+import torch
 import validators
 from grobid_client.grobid_client import GrobidClient
-from transformers import BertConfig, BertModel
+from transformers import BertForSequenceClassification, BertTokenizerFast
 
 ###########
 # GLOBALS #
