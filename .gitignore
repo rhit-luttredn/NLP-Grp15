@@ -1,2 +1,5 @@
 models
 keys.json
+models/bert-finetuned/config.json
+models/bert-finetuned/pytorch_model.bin
+models/bert-finetuned/training_args.bin
