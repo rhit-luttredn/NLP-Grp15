@@ -13,7 +13,8 @@ import requests
 import torch
 import validators
 from grobid_client.grobid_client import GrobidClient
-from transformers import BertForSequenceClassification, BertTokenizerFast
+from transformers import BertForSequenceClassification, BertTokenizerFast, BartForConditionalGeneration, BartTokenizerFast
+from transformers import pipeline
 
 ###########
 # GLOBALS #
@@ -22,9 +23,8 @@ GROBID_CLIENT = None
 BERT_PATH = "./models/bert-finetuned/"
 BERT_MODEL = None
 BERT_TOKENIZER = None
-CURR_DOCUMENT_TEXT = None
-CURR_EXTRACTED_TEXT = None
-CURR_ABSTRACT_TEXT = None
+BART_MODEL = None
+BART_TOKENIZER = None
 DOWNLOADS_DIR = tempfile.mkdtemp()
 DELAY = 500
 q = Queue()
@@ -89,10 +89,22 @@ def extractive_summarization(document):
     salient_sents = [doc_sents[i] for i in range(len(berted_doc)) if berted_doc[i] == 1]
     return " ".join(salient_sents)
 
+def abstractive_summarization(document):
+    # summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+    inputs = BART_TOKENIZER([document], max_length=1024, return_tensors='pt').input_ids
+    summary_ids = BART_MODEL(inputs, num_beams=4, max_length=5, early_stopping=True)
+    
+
+
+    return summarizer(document, max_length=200, do_sample=False)
+
 def load_models():
-    global BERT_MODEL, BERT_TOKENIZER
+    global BERT_MODEL, BERT_TOKENIZER, BART_MODEL, BART_TOKENIZER
     BERT_MODEL = BertForSequenceClassification.from_pretrained(BERT_PATH)
     BERT_TOKENIZER = BertTokenizerFast.from_pretrained('bert-base-uncased')
+    BART_MODEL = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn")
+    BART_TOKENIZER = BartTokenizerFast.from_pretrained("facebook/bart-large-cnn")
 
 nltk.download('punkt')
 
@@ -236,9 +248,9 @@ class MainFrame(tk.Frame):
         # Extractive summarization
         self.curr_extracted_text = extractive_summarization(self.curr_doc_text)
 
-        # TODO Abstractive summarization
-        # curr_abstract_text = abstractive_summarization(curr_extracted_text)
-        # self.curr_abstract_text = curr_abstract_text
+        # Abstractive summarization
+        curr_abstract_text = abstractive_summarization(self.curr_extracted_text)
+        self.curr_abstract_text = curr_abstract_text
 
     def on_upload_file(self):
         # Open a file dialog to select a file
